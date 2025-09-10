@@ -2,12 +2,15 @@
   "name": "apinode",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/server.js",
+  "type": "module",
   "engines": {
-    "node": ">=18"
+    "node": "18.x"
   },
   "scripts": {
     "build": "tsc",
+    "postbuild": "prisma generate",
+    "migrate:deploy": "prisma migrate deploy",
     "dev": "ts-node-dev --exit-child --transpile-only --ignore-watch node_modules --respawn ./src/server.ts",
     "start": "node dist/server.js"
   },
@@ -15,13 +18,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^5.0.0",
+    "@prisma/client": "5.13.0",
     "bcrypt": "^5.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.1",
-    "nodemailer": "^6.9.8",      
+    "nodemailer": "^6.9.8",
     "zod": "^3.21.4"
   },
   "devDependencies": {
@@ -31,10 +34,11 @@
     "@types/express": "^4.17.17",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/node": "^20.4.5",
+    "@types/nodemailer": "^7.0.1",
     "@typescript-eslint/eslint-plugin": "^6.2.0",
     "@typescript-eslint/parser": "^6.2.0",
     "eslint": "^8.45.0",
-    "prisma": "^5.13.0",
+    "prisma": "5.13.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.1.6"
   }
