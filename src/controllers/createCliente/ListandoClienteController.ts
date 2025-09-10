@@ -1,16 +1,23 @@
 import { Request, Response } from "express";
 import { prisma } from "../../database/client";
 
-
-export const ListandoClienteController = async (req: Request, res: Response) => {
+export const ListandoClienteController = async (
+	req: Request,
+	res: Response,
+) => {
 	try {
-		const cliente = await prisma.cliente.findFirst({orderBy: {consumidor: "desc"}});
+		if (!req.userId) {
+			return res.status(401).json({ message: "Não autorizado" });
+		}
 
-		return res.status(200).json({ message: "Todos Cliente Cadastrado", cliente  });
+		const cliente = await prisma.cliente.findMany({
+			where: { usuarioId: Number(req.userId) },
+		});
 
+		return res
+			.status(200)
+			.json({ message: "Todos Cliente Cadastrado", cliente });
 	} catch (error) {
-		return res.status(400).json({message: "Error Servidor"});
+		return res.status(400).json({ message: "Error Servidor" });
 	}
-
-
 };

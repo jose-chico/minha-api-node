@@ -13,19 +13,25 @@ exports.ListandoUmClienteController = void 0;
 const client_1 = require("../../database/client");
 const ListandoUmClienteController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        if (!req.userId) {
+            return res.status(401).json({ message: "Não autorizado" });
+        }
         const { consumidor } = req.params;
-        const cliente = yield client_1.prisma.cliente.findUnique({
+        const cliente = yield client_1.prisma.cliente.findFirst({
             where: {
-                consumidor: String(consumidor)
-            }
+                consumidor: String(consumidor),
+                usuarioId: Number(req.userId),
+            },
         });
         if (!cliente) {
-            return res.status(400).json({ massage: "Nenhuma parcela foi encontrada!" });
+            return res
+                .status(404)
+                .json({ message: "Cliente não encontrado!" });
         }
         return res.status(200).json({ message: "Cliente", cliente });
     }
     catch (error) {
-        return res.status(400).json({ message: "Error Servidor " });
+        return res.status(400).json({ message: "Error Servidor" });
     }
 });
 exports.ListandoUmClienteController = ListandoUmClienteController;

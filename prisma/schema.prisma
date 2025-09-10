@@ -1,6 +1,5 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,11 +9,40 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Usuario {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  clientes     Cliente[]
+  resetTokens  PasswordResetToken[] // ← relação com tokens de reset
+}
+
 model Cliente {
-  id         Int      @id @default(autoincrement())
-  consumidor String @unique
+  id         Int       @id @default(autoincrement())
+  consumidor String
   nunerro    String
   datass     String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  usuarioId  Int
+  usuario    Usuario   @relation(fields: [usuarioId], references: [id])
+}
+
+model PasswordResetToken {
+  id         Int      @id @default(autoincrement())
+  tokenHash  String
+  expiresAt  DateTime
+  usedAt     DateTime?
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+
+  usuarioId  Int
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id])
+
+  @@index([usuarioId])
+  @@index([expiresAt])
+  @@unique([tokenHash])
 }

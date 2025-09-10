@@ -11,21 +11,36 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DeletarClienteController = void 0;
 const client_1 = require("../../database/client");
+const zod_1 = require("zod");
+const paramsSchema = zod_1.z.object({
+    consumidor: zod_1.z.string().min(1, "consumidor é obrigatório"),
+});
 const DeletarClienteController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { consumidor } = req.body;
-        const clienteExiste = yield client_1.prisma.cliente.findUnique({
-            where: {
-                consumidor: String(consumidor)
-            }
+        if (!req.userId) {
+            return res.status(401).json({ message: "Não autorizado" });
+        }
+        const { consumidor } = paramsSchema.parse(req.params);
+        const clienteExiste = yield client_1.prisma.cliente.findFirst({
+            where: { consumidor: String(consumidor), usuarioId: Number(req.userId) },
         });
         if (!clienteExiste) {
-            return res.status(400).json({ massage: "Consumidora não Encontrdo!" });
+            return res.status(404).json({ message: "Consumidor não encontrado." });
         }
-        const cliente = yield client_1.prisma.cliente.delete({ where: { consumidor } });
-        return res.status(200).json({ message: "Seu valor foi pago com sucesso!!", cliente });
+        const cliente = yield client_1.prisma.cliente.delete({
+            where: { id: clienteExiste.id },
+        });
+        return res.status(200).json({
+            message: "Cliente deletado com sucesso!",
+            cliente,
+        });
     }
     catch (error) {
+        if (error instanceof zod_1.z.ZodError) {
+            return res
+                .status(400)
+                .json(error.issues.map((issue) => ({ message: issue.message })));
+        }
         return res.status(400).json({ message: "Error Servidor" });
     }
 });
