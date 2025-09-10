@@ -98,6 +98,7 @@
       if (e.key === 'Enter' && !els.btnLogin.disabled) els.btnLogin.click();
     }));
 
+    // LOGIN -> envia { email, senha }
     els.btnLogin.addEventListener('click', async () => {
       setMsg('Autenticando...');
       els.btnLogin.disabled = true;
@@ -105,7 +106,7 @@
         const res = await fetch(API + '/auth/login', {
           method:'POST',
           headers:{ 'Content-Type':'application/json' },
-          body: JSON.stringify({ email: els.email.value, password: els.senha.value })
+          body: JSON.stringify({ email: els.email.value, senha: els.senha.value })
         });
         const data = await res.json().catch(()=>({}));
 
@@ -133,6 +134,7 @@
       }
     });
 
+    // FORGOT
     els.forgotLink.addEventListener('click', () => {
       els.forgotArea.style.display = 'grid';
       els.forgotEmail.value = els.email.value || '';
@@ -141,12 +143,10 @@
       els.forgotEmail.focus();
       setTimeout(()=>els.forgotArea.scrollIntoView({behavior:'smooth', block:'center'}), 0);
     });
-
     els.backToLogin.addEventListener('click', () => {
       els.forgotArea.style.display = 'none';
       setMsgForgot('');
     });
-
     els.btnForgot.addEventListener('click', async () => {
       setMsgForgot('Enviando e-mail...');
       els.btnForgot.disabled = true;

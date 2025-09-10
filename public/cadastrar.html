@@ -64,6 +64,7 @@
 
     function msgErro(d,f='Erro'){ if(!d) return f; if(Array.isArray(d)&&d[0]?.message) return d.map(i=>i.message).join(' | '); return d.message||f; }
 
+    // CADASTRO -> envia { email, senha }
     els.btnCadastrar.addEventListener('click', async () => {
       if (!canSubmit()) return;
       setMsg('Enviando...');
@@ -72,7 +73,7 @@
         const res = await fetch(API + '/usuario', {
           method:'POST',
           headers:{ 'Content-Type':'application/json' },
-          body: JSON.stringify({ email: els.email.value, password: els.senha.value })
+          body: JSON.stringify({ email: els.email.value, senha: els.senha.value })
         });
         const data = await res.json().catch(()=>({}));
         if(!res.ok) throw new Error(msgErro(data, 'Falha ao cadastrar'));
