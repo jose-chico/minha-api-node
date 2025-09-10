@@ -39,12 +39,10 @@
     <div class="grid">
       <input id="email" class="input" type="email" placeholder="Email" autocomplete="username" />
       <input id="senha" class="input" type="password" placeholder="Senha" autocomplete="current-password" />
-
       <div class="row">
         <a id="forgotLink" class="link">Esqueci minha senha?</a>
       </div>
-
-      <button id="btnLogin" class="btn" disabled>Entrar</button>
+      <button id="btnLogin" class="btn" type="button" disabled>Entrar</button>
       <div id="msg" class="muted"></div>
 
       <div id="forgotArea" class="forgot">
@@ -53,7 +51,7 @@
           <p class="muted small">Informe seu e-mail para enviarmos o link de redefinição.</p>
         </div>
         <input id="forgotEmail" class="input" type="email" placeholder="Seu e-mail" />
-        <button id="btnForgot" class="btn" disabled>Enviar link</button>
+        <button id="btnForgot" class="btn" type="button" disabled>Enviar link</button>
         <div id="msgForgot" class="muted"></div>
         <div class="row">
           <a id="backToLogin" class="link small">Voltar ao login</a>
@@ -76,42 +74,30 @@
       backToLogin: document.getElementById('backToLogin'),
     };
 
-    // Base da API (usa o mesmo domínio quando hospedado no Render)
     const API = (() => {
       const saved = localStorage.getItem('apiBase');
       if (saved) return saved.replace(/\/+$/, '');
       const origin = window.location.origin;
-      if (origin && origin.startsWith('http')) return origin; // páginas servidas pela própria API
-      return 'https://minha-api-node-p0p6.onrender.com';       // fallback
+      if (origin && origin.startsWith('http')) return origin;
+      return 'https://minha-api-node-p0p6.onrender.com';
     })();
 
-    // Utilitários
     function setMsg(t, cls=''){ els.msg.textContent = t || ''; els.msg.className = 'muted ' + cls; }
     function setMsgForgot(t, cls=''){ els.msgForgot.textContent = t || ''; els.msgForgot.className = 'muted ' + cls; }
     function validEmail(v){ return /\S+@\S+\.\S+/.test(v); }
     function toggleLogin(){ els.btnLogin.disabled = !(els.email.value && els.senha.value); }
     function toggleForgot(){ els.btnForgot.disabled = !validEmail(els.forgotEmail.value); }
-    function extrairToken(data){
-      if(!data) return null;
-      if(typeof data === 'string') return data;
-      return data.token || data.accessToken || data.jwt || null;
-    }
-    function msgErro(data, fallback='Erro'){
-      if (!data) return fallback;
-      if (Array.isArray(data) && data[0]?.message) return data.map(i=>i.message).join(' | ');
-      return data.message || fallback;
-    }
+    function extrairToken(d){ if(!d) return null; if(typeof d==='string') return d; return d.token||d.accessToken||d.jwt||null; }
+    function msgErro(d,f='Erro'){ if(!d) return f; if(Array.isArray(d)&&d[0]?.message) return d.map(i=>i.message).join(' | '); return d.message||f; }
 
     els.email.addEventListener('input', toggleLogin);
     els.senha.addEventListener('input', toggleLogin);
     els.forgotEmail && els.forgotEmail.addEventListener('input', toggleForgot);
 
-    // Submit com Enter
     [els.email, els.senha].forEach(i => i.addEventListener('keydown', e => {
       if (e.key === 'Enter' && !els.btnLogin.disabled) els.btnLogin.click();
     }));
 
-    // Login
     els.btnLogin.addEventListener('click', async () => {
       setMsg('Autenticando...');
       els.btnLogin.disabled = true;
@@ -147,7 +133,6 @@
       }
     });
 
-    // Esqueci minha senha
     els.forgotLink.addEventListener('click', () => {
       els.forgotArea.style.display = 'grid';
       els.forgotEmail.value = els.email.value || '';

@@ -34,21 +34,15 @@
     <div class="grid">
       <input id="email" class="input" type="email" placeholder="Email" autocomplete="email" />
       <input id="senha" class="input" type="password" placeholder="Senha (mín. 6)" autocomplete="new-password" />
-      <button id="btnCadastrar" class="btn" disabled>Cadastrar</button>
+      <button id="btnCadastrar" class="btn" type="button" disabled>Cadastrar</button>
       <div id="msg" class="muted"></div>
       <div class="muted">Já tem conta? <a href="login.html">Entrar</a></div>
     </div>
   </div>
 
   <script>
-    const els = {
-      email: document.getElementById('email'),
-      senha: document.getElementById('senha'),
-      btnCadastrar: document.getElementById('btnCadastrar'),
-      msg: document.getElementById('msg'),
-    };
+    const els = { email: email, senha: senha, btnCadastrar: btnCadastrar, msg: msg };
 
-    // Base da API: mesmo domínio quando servido pelo Express no Render; fallback para a URL pública
     const API = (() => {
       const saved = localStorage.getItem('apiBase');
       if (saved) return saved.replace(/\/+$/, '');
@@ -57,31 +51,18 @@
       return 'https://minha-api-node-p0p6.onrender.com';
     })();
 
-    // Pré-preencher com o e-mail salvo (caso vindo do login)
     const pre = localStorage.getItem('emailParaCadastro');
     if (pre) { els.email.value = pre; localStorage.removeItem('emailParaCadastro'); }
 
-    function setMsg(text, type){
-      els.msg.textContent = text || '';
-      els.msg.className = 'muted ' + (type || '');
-    }
-    function canSubmit(){
-      return els.email.value && els.senha.value && els.senha.value.length >= 6;
-    }
+    function setMsg(t, type){ msg.textContent=t||''; msg.className='muted '+(type||''); }
+    function canSubmit(){ return els.email.value && els.senha.value && els.senha.value.length>=6; }
     function toggle(){ els.btnCadastrar.disabled = !canSubmit(); }
-    els.email.addEventListener('input', toggle);
-    els.senha.addEventListener('input', toggle);
+    [els.email, els.senha].forEach(i => {
+      i.addEventListener('input', toggle);
+      i.addEventListener('keydown', e => { if(e.key==='Enter' && !els.btnCadastrar.disabled) els.btnCadastrar.click(); });
+    });
 
-    // submit com Enter
-    [els.email, els.senha].forEach(i => i.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && !els.btnCadastrar.disabled) els.btnCadastrar.click();
-    }));
-
-    function msgErro(data, fallback='Erro'){
-      if (!data) return fallback;
-      if (Array.isArray(data) && data[0]?.message) return data.map(i=>i.message).join(' | ');
-      return data.message || fallback;
-    }
+    function msgErro(d,f='Erro'){ if(!d) return f; if(Array.isArray(d)&&d[0]?.message) return d.map(i=>i.message).join(' | '); return d.message||f; }
 
     els.btnCadastrar.addEventListener('click', async () => {
       if (!canSubmit()) return;
@@ -91,13 +72,12 @@
         const res = await fetch(API + '/usuario', {
           method:'POST',
           headers:{ 'Content-Type':'application/json' },
-          body: JSON.stringify({ email: els.email.value, password: els.senha.value }) // <-- password
+          body: JSON.stringify({ email: els.email.value, password: els.senha.value })
         });
         const data = await res.json().catch(()=>({}));
         if(!res.ok) throw new Error(msgErro(data, 'Falha ao cadastrar'));
-
         setMsg('Usuário cadastrado! Redirecionando para o login...', 'success');
-        setTimeout(()=>{ window.location.href = 'login.html'; }, 800);
+        setTimeout(()=>{ window.location.href='login.html'; }, 800);
       }catch(err){
         setMsg(err.message || 'Erro', 'error');
       }finally{
@@ -105,7 +85,6 @@
       }
     });
 
-    // estado inicial
     toggle();
   </script>
 </body>
